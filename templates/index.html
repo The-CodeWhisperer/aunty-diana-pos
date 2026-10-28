@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auntie Diana's Canteen - Place Order</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background-color: #f4f4f9; }
+        .card { background: white; padding: 30px; border-radius: 12px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        button { background-color: #28a745; color: white; border: none; padding: 15px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        button:disabled { background-color: #ccc; }
+        #status { margin-top: 15px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Auntie Diana's Kitchen</h2>
+        <p>Press the button, speak your order (e.g., <em>"Jollof 25 GHS with egg"</em>), then click again to send!</p>
+        <button id="recordBtn">Start Recording</button>
+        <p id="status">Status: Ready</p>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        const recordBtn = document.getElementById('recordBtn');
+        const statusText = document.getElementById('status');
+
+        recordBtn.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = sendAudioToServer;
+
+                mediaRecorder.start();
+                recordBtn.innerText = "Stop & Send Order";
+                recordBtn.style.backgroundColor = "#dc3545";
+                statusText.innerText = "Status: Recording your voice...";
+            } else {
+                mediaRecorder.stop();
+                recordBtn.innerText = "Start Recording";
+                recordBtn.style.backgroundColor = "#28a745";
+                statusText.innerText = "Status: Sending order to kitchen...";
+            }
+        });
+
+        async function sendAudioToServer() {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, `order_${Date.now()}.wav`);
+
+            try {
+                const response = await fetch('/api/upload_order', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    statusText.innerText = `Order #${result.order_id} sent successfully!`;
+                } else {
+                    statusText.innerText = `Error: ${result.error}`;
+                }
+            } catch (err) {
+                statusText.innerText = "Failed to connect to server.";
+            }
+        }
+    </script>
+</body>
+</html>
