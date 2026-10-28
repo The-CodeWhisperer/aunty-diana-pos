@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auntie Diana - Kitchen Display</title>
+    <style>
+        :root {
+            --brand-yellow: #FFCC00;
+            --brand-green: #28A745;
+            --bg-dark: #1E1E2F;
+            --card-bg: #2B2B40;
+            --text-light: #FFFFFF;
+            --text-muted: #AAAAAA;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 30px;
+            margin: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--brand-yellow);
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+        }
+
+        .order-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .order-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            border-left: 6px solid var(--brand-yellow);
+        }
+
+        .order-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+            color: var(--brand-yellow);
+        }
+
+        .order-card p {
+            margin: 0 0 15px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .btn-complete {
+            width: 100%;
+            background-color: var(--brand-green);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-complete:hover {
+            opacity: 0.9;
+        }
+
+        .no-orders {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Auntie Diana's Kitchen Orders</h1>
+
+    <div class="order-grid">
+        {% for order in orders %}
+        <div class="order-card" id="card-{{ order['id'] }}">
+            <h3>Order Ticket #{{ order['id'] }}</h3>
+            <p>Placed at: {{ order['timestamp'] }}</p>
+            <audio controls src="/{{ order['audio_path'] }}"></audio>
+            <button class="btn-complete" onclick="markCompleted({{ order['id'] }})">Mark as Completed</button>
+        </div>
+        {% else %}
+        <p class="no-orders">No pending orders right now! Ready for the next order.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+        async function markCompleted(orderId) {
+            try {
+                const response = await fetch(`/api/complete_order/${orderId}`, { 
+                    method: 'POST' 
+                });
+                
+                if (response.ok) {
+                    const card = document.getElementById(`card-${orderId}`);
+                    if (card) {
+                        card.remove();
+                    }
+                    // Refresh if no cards left
+                    if (document.querySelectorAll('.order-card').length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert("Failed to update order status.");
+                }
+            } catch (err) {
+                alert("Server connection error.");
+            }
+        }
+    </script>
+</body>
+</html>
