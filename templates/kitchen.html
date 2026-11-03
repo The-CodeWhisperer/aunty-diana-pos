@@ -3,129 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auntie Diana - Kitchen Display</title>
+    <title>Kitchen Display System - Auntie Diana</title>
     <style>
         :root {
-            --brand-yellow: #FFCC00;
-            --brand-green: #28A745;
-            --bg-dark: #1E1E2F;
-            --card-bg: #2B2B40;
-            --text-light: #FFFFFF;
-            --text-muted: #AAAAAA;
+            --bg: #0F172A;
+            --card-bg: #1E293B;
+            --accent: #F59E0B;
+            --success: #10B981;
+            --text: #F8FAFC;
+            --text-muted: #94A3B8;
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             padding: 30px;
             margin: 0;
         }
 
-        h1 {
-            text-align: center;
-            color: var(--brand-yellow);
-            font-size: 2.2rem;
-            margin-bottom: 30px;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background-color: #334155;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
         }
 
         .order-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .order-card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            width: 300px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            border-left: 6px solid var(--brand-yellow);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-top: 6px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .order-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.3rem;
-            color: var(--brand-yellow);
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
-        .order-card p {
-            margin: 0 0 15px 0;
+        .ticket-number {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .time-stamp {
+            font-size: 0.85rem;
             color: var(--text-muted);
-            font-size: 0.9rem;
         }
 
         audio {
             width: 100%;
-            margin-bottom: 15px;
-            border-radius: 6px;
+            margin: 20px 0;
+            border-radius: 8px;
         }
 
-        .btn-complete {
-            width: 100%;
-            background-color: var(--brand-green);
+        .btn-done {
+            background-color: var(--success);
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 14px;
+            border-radius: 10px;
             font-size: 1rem;
             font-weight: 700;
+            cursor: pointer;
             transition: opacity 0.2s ease;
         }
 
-        .btn-complete:hover {
-            opacity: 0.9;
-        }
+        .btn-done:hover { opacity: 0.9; }
 
-        .no-orders {
+        .empty-state {
             text-align: center;
-            font-size: 1.2rem;
+            grid-column: 1 / -1;
+            padding: 60px 20px;
             color: var(--text-muted);
-            margin-top: 50px;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
 
-    <h1>Auntie Diana's Kitchen Orders</h1>
+    <div class="header">
+        <h1>🍳 Kitchen Display System</h1>
+        <div class="badge" id="orderCount">Pending Tickets: {{ orders|length }}</div>
+    </div>
 
     <div class="order-grid">
         {% for order in orders %}
         <div class="order-card" id="card-{{ order['id'] }}">
-            <h3>Order Ticket #{{ order['id'] }}</h3>
-            <p>Placed at: {{ order['timestamp'] }}</p>
-            <audio controls src="/{{ order['audio_path'] }}"></audio>
-            <button class="btn-complete" onclick="markCompleted({{ order['id'] }})">Mark as Completed</button>
+            <div>
+                <div class="ticket-header">
+                    <span class="ticket-number">Ticket #{{ order['id'] }}</span>
+                    <span class="time-stamp">{{ order['timestamp'] }}</span>
+                </div>
+                <p style="margin: 5px 0 15px 0; font-size: 0.9rem; color: var(--text-muted);">Voice Note Order</p>
+                <audio controls src="/{{ order['audio_path'] }}"></audio>
+            </div>
+            <button class="btn-done" onclick="markCompleted({{ order['id'] }})">Mark Order Ready</button>
         </div>
         {% else %}
-        <p class="no-orders">No pending orders right now! Ready for the next order.</p>
+        <div class="empty-state">
+            <h3>🎉 All caught up!</h3>
+            <p>New incoming voice orders will appear here automatically.</p>
+        </div>
         {% endfor %}
     </div>
 
     <script>
+        // Refresh kitchen display every 5 seconds for new orders
+        setInterval(() => {
+            fetch('/kitchen')
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    document.querySelector('.order-grid').innerHTML = doc.querySelector('.order-grid').innerHTML;
+                    document.getElementById('orderCount').innerText = doc.getElementById('orderCount').innerText;
+                });
+        }, 5000);
+
         async function markCompleted(orderId) {
             try {
-                const response = await fetch(`/api/complete_order/${orderId}`, { 
-                    method: 'POST' 
-                });
-                
+                const response = await fetch(`/api/complete_order/${orderId}`, { method: 'POST' });
                 if (response.ok) {
                     const card = document.getElementById(`card-${orderId}`);
-                    if (card) {
-                        card.remove();
-                    }
-                    // Refresh if no cards left
-                    if (document.querySelectorAll('.order-card').length === 0) {
-                        location.reload();
-                    }
-                } else {
-                    alert("Failed to update order status.");
+                    if (card) card.remove();
                 }
             } catch (err) {
-                alert("Server connection error.");
+                alert("Failed to update status.");
             }
         }
     </script>

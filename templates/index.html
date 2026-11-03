@@ -3,21 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auntie Diana's Canteen - Place Order</title>
+    <title>Auntie Diana's Voice Canteen POS</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background-color: #f4f4f9; }
-        .card { background: white; padding: 30px; border-radius: 12px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        button { background-color: #28a745; color: white; border: none; padding: 15px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-top: 15px; }
-        button:disabled { background-color: #ccc; }
-        #status { margin-top: 15px; font-weight: bold; color: #333; }
+        :root {
+            --primary: #E4002B;
+            --primary-dark: #B80022;
+            --bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .navbar {
+            max-width: 1000px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 2px solid #EAEAEA;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Hero Voice Box */
+        .voice-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            margin-bottom: 40px;
+        }
+
+        .voice-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .voice-card p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .btn-record {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(228, 0, 43, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-record:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .pulse {
+            animation: pulse-animation 1.5s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0px rgba(220, 53, 69, 0.6); }
+            100% { box-shadow: 0 0 0 20px rgba(220, 53, 69, 0); }
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        /* Menu Grid */
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .food-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
+        }
+
+        .food-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .food-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .food-card-body {
+            padding: 20px;
+        }
+
+        .food-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .food-price {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .food-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Auntie Diana's Kitchen</h2>
-        <p>Press the button, speak your order (e.g., <em>"Jollof 25 GHS with egg"</em>), then click again to send!</p>
-        <button id="recordBtn">Start Recording</button>
-        <p id="status">Status: Ready</p>
+
+    <div class="navbar">
+        <div class="brand">Auntie Diana Canteen</div>
+        <div><strong>Campus Local Kiosk</strong></div>
+    </div>
+
+    <div class="container">
+        <!-- Voice Order Kiosk -->
+        <div class="voice-card">
+            <h2>🎙️ Press & Speak Your Order</h2>
+            <p>Tap the button below, state your meal (e.g., <em>"Jollof 25 Cedis with extra plantain"</em>), then tap to submit.</p>
+            <button id="recordBtn" class="btn-record">Start Recording</button>
+            <p id="status">Status: Standby</p>
+        </div>
+
+        <!-- Menu Gallery -->
+        <div class="section-title">Today's Menu</div>
+        <div class="menu-grid">
+            <div class="food-card">
+                <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=600&q=80" alt="Jollof Rice">
+                <div class="food-card-body">
+                    <div class="food-title">Ghanaian Jollof + Chicken</div>
+                    <div class="food-price">GHS 25.00</div>
+                    <p class="food-desc">Smoky firewood Jollof rice served with spicy fried chicken and salad.</p>
+                </div>
+            </div>
+
+            <div class="food-card">
+                <img src="https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80" alt="Crispy Chicken">
+                <div class="food-card-body">
+                    <div class="food-title">Fried Chicken + Plantain</div>
+                    <div class="food-price">GHS 30.00</div>
+                    <p class="food-desc">Seasoned fried chicken thighs accompanied by sweet golden plantain slices.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -28,22 +205,30 @@
 
         recordBtn.addEventListener('click', async () => {
             if (!mediaRecorder || mediaRecorder.state === "inactive") {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
 
-                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-                mediaRecorder.onstop = sendAudioToServer;
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = sendAudioToServer;
 
-                mediaRecorder.start();
-                recordBtn.innerText = "Stop & Send Order";
-                recordBtn.style.backgroundColor = "#dc3545";
-                statusText.innerText = "Status: Recording your voice...";
+                    mediaRecorder.start();
+                    recordBtn.innerText = "Stop & Send Order";
+                    recordBtn.style.backgroundColor = "#dc3545";
+                    recordBtn.classList.add("pulse");
+                    statusText.innerText = "Status: Recording... Speak now";
+                    statusText.style.color = "#dc3545";
+                } catch (err) {
+                    statusText.innerText = "Error: Microphone permission denied.";
+                }
             } else {
                 mediaRecorder.stop();
                 recordBtn.innerText = "Start Recording";
-                recordBtn.style.backgroundColor = "#28a745";
-                statusText.innerText = "Status: Sending order to kitchen...";
+                recordBtn.style.backgroundColor = "#E4002B";
+                recordBtn.classList.remove("pulse");
+                statusText.innerText = "Status: Transmitting order...";
+                statusText.style.color = "#111";
             }
         });
 
@@ -59,12 +244,13 @@
                 });
                 const result = await response.json();
                 if (response.ok) {
-                    statusText.innerText = `Order #${result.order_id} sent successfully!`;
+                    statusText.innerText = `✅ Success! Ticket #${result.order_id} placed.`;
+                    statusText.style.color = "#28a745";
                 } else {
                     statusText.innerText = `Error: ${result.error}`;
                 }
             } catch (err) {
-                statusText.innerText = "Failed to connect to server.";
+                statusText.innerText = "Error: Could not reach server.";
             }
         }
     </script>
